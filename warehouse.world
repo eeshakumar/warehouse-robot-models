@@ -17,7 +17,6 @@
 			<static>false</static>
 			<link name='chassis'>
            		<pose>0 0 .1 0 0 0</pose>
-
 		        <collision name='collision'>
 		         	<geometry>
 		           		<box>
@@ -115,32 +114,32 @@
         				<pose>0.00 0.00 0.15 0 0 0</pose>
         				<geometry>
           				<box>
-            					<size>0.09 0.09 0.05</size>
+            					<size>0.09 0.09 0.02</size>
           				</box>
         				</geometry>
       			</visual>
        			<collision name="tower">
-        				<pose>0.00 0.00 0.15 0 0 0</pose>
+        				<pose>0.00 0.00 0.16 0 0 0</pose>
         				<geometry>
           				<box>
-            					<size>0.09 0.09 0.05</size>
+            					<size>0.09 0.09 0.02</size>
           				</box>
         				</geometry>
       			</collision>
       			<visual name="tower_plate">
-        				<pose>0 0 0.17 0 0 0</pose>
+        				<pose>0 0 0.165 0 0 0</pose>
         				<geometry>
           				<cylinder>
-            					<length>0.02</length>
+            					<length>0.01</length>
             					<radius>0.2</radius>
           				</cylinder>
         				</geometry>
       			</visual>
       			<collision name="tower_plate">
-        				<pose>0 0 0.17 0 0 0</pose>
+        				<pose>0 0 0.165 0 0 0</pose>
         				<geometry>
           				<cylinder>
-            					<length>0.02</length>
+            					<length>0.01</length>
             					<radius>0.2</radius>
           				</cylinder>
         				</geometry>
@@ -188,6 +187,9 @@
         			<child>tower_plate</child>
         			<parent>chassis</parent>
       		</joint>
+            <plugin name="kiva_plugin" filename="libkiva_plugin.so">
+                <dist>1.0</dist>
+            </plugin>
 		</model>
 	</world>
 </sdf>
