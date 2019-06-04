@@ -9,3 +9,6 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${GAZEBO_CXX_FLAGS}")
 # Build our plugin
 add_library(kiva_plugin SHARED kiva_plugin.cc)
 target_link_libraries(kiva_plugin ${GAZEBO_LIBRARIES})
+
+add_executable(main main.cc)
+target_link_libraries(main ${GAZEBO_LIBRARIES} pthread)
