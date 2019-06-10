@@ -10,214 +10,119 @@
 		<include>
 			<uri>model://ground_plane</uri>
 		</include>
-		<!--<include>
+		<include>
 			<uri>model://kiva</uri>
-		</include> -->
-	<model name="basic_kiva">
-		<static>false</static>
-		<link name='chassis'>
-           		<pose>0 0 .1 0 0 0</pose>
+		</include>
+
+	<!--<plugin name="warehouse_plugin" filename="libwarehouse_plugin.so"/>-->
+<model name="shelf">
+			<link name='body'>
+           		<pose>0 0 0.2 0 0 0</pose>
 		        <collision name='collision'>
 		         	<geometry>
 		           		<box>
-		              			<size>.4 .2 .1</size>
+		              		<size>.8 .8 .05</size>
 		            		</box>
 		          	</geometry>
-		        </collision>
+		        	</collision>
 
 		        <visual name='visual'>
-		        	<geometry>
+		        		<geometry>
 		            		<box>
-		              			<size>.4 .2 .1</size>
+		              		<size>.8 .8 .05</size>
 		            		</box>
 		          	</geometry>
 		        </visual>
-          	</link>
-          	<link name="left_front_wheel">
-        		<pose>0.15 0.13 0.05 0 1.5707 1.5707</pose>
-			<collision name="collision">
-  				<geometry>
-    					<cylinder>
-      						<radius>.05</radius>
-      						<length>.05</length>
-    					</cylinder>
-  				</geometry>
-			</collision>
-			<visual name="visual">
-  				<geometry>
-    					<cylinder>
-      						<radius>.05</radius>
-      						<length>.05</length>
-    					</cylinder>
-  				</geometry>
-			</visual>
-      		</link>
-      		<link name="left_back_wheel">
-			<pose>-0.15 0.13 0.05 0 1.5707 1.5707</pose>
-			<collision name="collision">
-	  			<geometry>
-	    				<cylinder>
-		      				<radius>.05</radius>
-		      				<length>.05</length>
-	    				</cylinder>
-	  			</geometry>
-			</collision>
-			<visual name="visual">
-	  			<geometry>
-	    				<cylinder>
-		      				<radius>.05</radius>
-		      				<length>.05</length>
-	    				</cylinder>
-	  			</geometry>
-			</visual>
-      		</link>
-      		<link name="right_front_wheel">
-			<pose>0.15 -0.13 0.05 0 1.5707 1.5707</pose>
-			<collision name="collision">
-	  			<geometry>
-	    				<cylinder>
-	      				<radius>.05</radius>
-	      				<length>.05</length>
-	    				</cylinder>
-	  			</geometry>
-			</collision>
-			<visual name="visual">
-	  			<geometry>
-	    				<cylinder>
-	      				<radius>.05</radius>
-	      				<length>.05</length>
-	    				</cylinder>
-	  			</geometry>
-			</visual>
-      		</link>
-      		<link name="right_back_wheel">
-			<pose>-0.15 -0.13 0.05 0 1.5707 1.5707</pose>
-			<collision name="collision">
-	  			<geometry>
-	    				<cylinder>
-	      					<radius>.05</radius>
-	      					<length>.05</length>
-	   				</cylinder>
-	  			</geometry>
-			</collision>
-			<visual name="visual">
-          			<geometry>
-            				<cylinder>
-              					<radius>.05</radius>
-              					<length>.05</length>
-            				</cylinder>
-          			</geometry>
-       			</visual>
-      		</link>
-		<link name="rotate_ball_center">
-			<pose>0 0 0.05 0 0 0</pose>
-			<collision name="collision">
-	  			<geometry>
-	    				<sphere>
-	      					<radius>0</radius>
-	   				</sphere>
-	  			</geometry>
-			</collision>
-			<visual name="visual">
-	  			<geometry>
-	    				<sphere>
-	      					<radius>0.05</radius>
-	    				</sphere>
-	  			</geometry>
-			</visual>
-		</link>
-      		<link name="tower">
-      			<visual name="tower">
-        				<pose>0.00 0.00 0.15 0 0 0</pose>
-        				<geometry>
-          				<box>
-            					<size>0.09 0.09 0.02</size>
-          				</box>
-        				</geometry>
-      			</visual>
-       			<collision name="tower">
-        				<pose>0.00 0.00 0.16 0 0 0</pose>
-        				<geometry>
-          				<box>
-            					<size>0.09 0.09 0.02</size>
-          				</box>
-        				</geometry>
-      			</collision>
-		</link>
-		<link name="tower_plate">
-      			<visual name="tower_plate">
-        				<pose>0 0 0.165 0 0 0</pose>
-        				<geometry>
-          				<cylinder>
-            					<length>0.01</length>
-            					<radius>0.2</radius>
-          				</cylinder>
-        				</geometry>
-      			</visual>
-      			<collision name="tower_plate">
-        				<pose>0 0 0.165 0 0 0</pose>
-        				<geometry>
-          				<cylinder>
-            					<length>0.01</length>
-            					<radius>0.2</radius>
-          				</cylinder>
-        				</geometry>
-      			</collision>
-    		</link>
-      		<joint type="revolute" name="left_front_wheel_hinge">
-        			<pose>0 0 -0.03 0 0 0</pose>
-        			<child>left_front_wheel</child>
-        			<parent>chassis</parent>
-        			<axis>
-          			<xyz>0 0 1</xyz>
-       			</axis>
-      		</joint>
-		<joint type="revolute" name="left_back_wheel_hinge">
-        			<pose>0 0 -0.03 0 0 0</pose>
-        			<child>left_back_wheel</child>
-        			<parent>chassis</parent>
-        			<axis>
-          			<xyz>0 0 1</xyz>
-       			</axis>
-      		</joint>
-      		<joint type="revolute" name="right_front_wheel_hinge">
-        			<pose>0 0 0.03 0 0 0</pose>
-        			<child>right_front_wheel</child>
-        			<parent>chassis</parent>
-        			<axis>
-          			<xyz>0 0 1</xyz>
-        			</axis>
-      		</joint>
-      		<joint type="revolute" name="right_back_wheel_hinge">
-        			<pose>0 0 0.03 0 0 0</pose>
-        			<child>right_back_wheel</child>
-        			<parent>chassis</parent>
-        			<axis>
-          			<xyz>0 0 1</xyz>
-        			</axis>
-      		</joint>
-      		<joint type="fixed" name="tower_body">
+			</link>
+			<link name="leg_1">
+            <pose>0.35 0.35 0.1 0 0 0</pose>
+		        <collision name='collision'>
+		         	<geometry>
+		           		<box>
+		              		<size>.1 .1 0.20</size>
+		            		</box>
+		          	</geometry>
+		        	</collision>
+		        <visual name='visual'>
+		        		<geometry>
+		            		<box>
+		              		<size>.1 .1 0.20</size>
+		            		</box>
+		          	</geometry>
+		        </visual>
+			</link>
+            <link name="leg_2">
+            <pose>-0.35 0.35 0.1 0 0 0</pose>
+		        <collision name='collision'>
+		         	<geometry>
+		           		<box>
+		              		<size>.1 .1 0.20</size>
+		            		</box>
+		          	</geometry>
+		        	</collision>
+
+		        <visual name='visual'>
+		        		<geometry>
+		            		<box>
+		              		<size>.1 .1 0.20</size>
+		            		</box>
+		          	</geometry>
+		        </visual>
+			</link>
+            <link name="leg_3">
+            <pose>0.35 -0.35 0.1 0 0 0</pose>
+		        <collision name='collision'>
+		         	<geometry>
+		           		<box>
+		              		<size>.1 .1 0.20</size>
+		            		</box>
+		          	</geometry>
+		        	</collision>
+		        <visual name='visual'>
+		        		<geometry>
+		            		<box>
+		              		<size>.1 .1 0.20</size>
+		            		</box>
+		          	</geometry>
+		        </visual>
+			</link>
+            <link name="leg_4">
+            <pose>-0.35 -0.35 0.1 0 0 0</pose>
+		        <collision name='collision'>
+		         	<geometry>
+		           		<box>
+		              		<size>.1 .1 0.20</size>
+		            		</box>
+		          	</geometry>
+		        	</collision>
+		        <visual name='visual'>
+		        		<geometry>
+		            		<box>
+		              		<size>.1 .1 0.20</size>
+		            		</box>
+		          	</geometry>
+		        </visual>
+			</link>
+            <joint type="fixed" name="leg_1_joint">
         			<pose>0 0 0 0 0 0</pose>
-        			<child>tower</child>
-        			<parent>chassis</parent>
-      		</joint>
-      		<joint type="fixed" name="tower_head">
+        			<child>leg_1</child>
+        			<parent>body</parent>
+                </joint>
+                <joint type="fixed" name="leg_2_joint">
         			<pose>0 0 0 0 0 0</pose>
-        			<child>tower_plate</child>
-        			<parent>chassis</parent>
-      		</joint>
-      		<joint type="revolute" name="rotate_ball_center_hinge">
-        			<pose>0 0 0.025 0 0 0</pose>
-        			<parent>chassis</parent>
-				<child>rotate_ball_center</child>
-        			<axis>
-          			<xyz>0 0 1</xyz>
-        			</axis>
-      		</joint>
-	        <!--<plugin name="kiva_plugin" filename="./build/libkiva_plugin.so">
-		     <dist>1.0</dist>
-	    	</plugin> -->
-		<plugin name="kiva_rotate" filename="./kiva_plugins/build/libkiva_rotate.so" />
-	</model>
+        			<child>leg_2</child>
+        			<parent>body</parent>
+                </joint>
+                <joint type="fixed" name="leg_3_joint">
+        			<pose>0 0 0 0 0 0</pose>
+        			<child>leg_3</child>
+        			<parent>body</parent>
+                </joint>
+                <joint type="fixed" name="leg_4_joint">
+        			<pose>0 0 0 0 0 0</pose>
+        			<child>leg_4</child>
+        			<parent>body</parent>
+                </joint>
+</model>
 	</world>
 </sdf>
