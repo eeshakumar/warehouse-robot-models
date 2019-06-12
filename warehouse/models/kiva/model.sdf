@@ -177,11 +177,11 @@
         			<child>tower_plate</child>
         			<parent>tower</parent>
       		</joint>
-            <!--<plugin name="kiva_plugin" filename="../build/libkiva_plugin.so">
+            <!--<plugin name="kiva_plugin" filename="/home/eeshakumar/SoSe19/robot-se/models/build/libkiva_plugin.so">
                 <dist>1.0</dist>
             </plugin>-->
-	    <plugin name="kiva_rotate_with_load" filename="../kiva_plugins/build/libkiva_rotate_with_load.so">
-			<direction>1</direction>
+	    <plugin name="kiva_rotate_center" filename="../kiva_plugins/build/libkiva_rotate_center.so">
+			<direction>0</direction>
 	    </plugin>
 		</model>
 </sdf>

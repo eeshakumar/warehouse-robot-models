@@ -11,12 +11,16 @@
 #define NUMBER_OF_ITERATIONS 50
 
 namespace gazebo {
+        double init_x, init_y;
+	double dist = 1;
 	int iterations = 0;
 	class KivaRotateCenter: public ModelPlugin {
 		public: KivaRotateCenter() {}
 		public: virtual void Load(physics::ModelPtr _parent, sdf::ElementPtr _sdf) {
 			this->model = _parent;
 			this->sdf = _sdf;
+			ignition::math::Pose3d pose = this->get_world_pose();
+			init_y = pose.Pos().Y();
 			this->continued_angl_vel_left = CONTINUED_ANGULAR_VELOCITY_LEFT;
 			this->continued_angl_vel_right = CONTINUED_ANGULAR_VELOCITY_RIGHT;
 			this->direction = extract_direction();
@@ -71,7 +75,21 @@ namespace gazebo {
 				std::cout<<"Reached maximum iterations!!\n";
 ignition::math::Pose3d pose = this->get_world_pose();
 				float final_yaw = this->get_yaw(pose);
-				std::cout<<"Final Yaw: "<<final_yaw<<"\n";				
+				std::cout<<"Final Yaw: "<<final_yaw<<"\n";		
+		        	this->model->GetJoint("left_front_wheel_hinge")->SetVelocity(0, 2.0);
+        this->model->GetJoint("right_front_wheel_hinge")->SetVelocity(0, 2.0);
+        this->model->GetJoint("left_back_wheel_hinge")->SetVelocity(0, 2.0);
+        this->model->GetJoint("right_back_wheel_hinge")->SetVelocity(0, 2.0);		
+
+pose = this->model->WorldPose();
+        double y = pose.Pos().Y();
+      
+        if(y - init_y >= 1 * dist){
+            this->model->GetJoint("left_front_wheel_hinge")->SetVelocity(0, 0.0);
+            this->model->GetJoint("right_front_wheel_hinge")->SetVelocity(0, 0.0);
+            this->model->GetJoint("left_back_wheel_hinge")->SetVelocity(0, 0.0);
+            this->model->GetJoint("right_back_wheel_hinge")->SetVelocity(0, 0.0);
+        }		
 			}		
 		}
 		private: int extract_direction() {
