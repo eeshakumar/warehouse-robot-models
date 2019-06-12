@@ -8,11 +8,11 @@
 #define INITIAL_ANGULAR_VELOCITY_RIGHT -0.5
 #define CONTINUED_ANGULAR_VELOCITY_LEFT 0.25
 #define CONTINUED_ANGULAR_VELOCITY_RIGHT -0.25
-#define NUMBER_OF_ITERATIONS 150
+#define NUMBER_OF_ITERATIONS (128*3)
 #define WORLD_STR "warehouse_rotate.world"
+#define SHELF_PREFIX "shelf_"
 
-namespace gazebo {
-	int iterations = 0;
+namespace gazebo {cd 
 	class KivaRotateCenterWithLoad: public ModelPlugin {
 		public: KivaRotateCenterWithLoad() {}
 		public: virtual void Load(physics::ModelPtr _parent, sdf::ElementPtr _sdf) {
@@ -20,36 +20,41 @@ namespace gazebo {
 			this->sdf = _sdf;
 			this->world = this->model->GetWorld();
 			std::cout<<"World: "<<this->world->Name()<<"\n";
-			this->shelf = this->world->ModelByName("shelf");
+			std::string shelf_name = this->get_shelf_name_for_model();
+			std::cout<<"Fetching shelf by name: "<<shelf_name<<" for kiva robot "<<this->model->GetName();
+			this->shelf = this->world->ModelByName(shelf_name);
 			this->continued_angl_vel_left = CONTINUED_ANGULAR_VELOCITY_LEFT;
 			this->continued_angl_vel_right = CONTINUED_ANGULAR_VELOCITY_RIGHT;
 			this->direction = extract_direction();
-			if(direction==0) {
-				//left	
-				std::cout<<"Rotating left\n";
-				this->model->SetAngularVel(ignition::math::Vector3d(0, 0, INITIAL_ANGULAR_VELOCITY_LEFT));			
-				ignition::math::Pose3d pose = this->get_world_pose();
-				float current_yaw = this->get_yaw(pose);
-				this->rotation_in_rads = degreesToRadians(90) + current_yaw;
-				std::cout<<"Current Yaw: "<<current_yaw<<"\n";
-				this->set_shelf_pose(this->get_world_pose());
-			} else if(direction==1) {
-				//right	
-				std::cout<<"Rotating right\n";		
-				this->model->SetAngularVel(ignition::math::Vector3d(0, 0, INITIAL_ANGULAR_VELOCITY_RIGHT));
-				ignition::math::Pose3d pose = this->get_world_pose();
-				float current_yaw = this->get_yaw(pose);
-				this->rotation_in_rads = degreesToRadians(-90) + current_yaw;
-				std::cout<<"Current Yaw: "<<current_yaw<<"\n";
-				this->set_shelf_pose(this->get_world_pose());
+			if(this->shelf!=NULL) {
+				if(this->direction==0) {
+					//left	
+					std::cout<<"Rotating left\n";
+					this->model->SetAngularVel(ignition::math::Vector3d(0, 0, INITIAL_ANGULAR_VELOCITY_LEFT));			
+					ignition::math::Pose3d pose = this->get_world_pose();
+					float current_yaw = this->get_yaw(pose);
+					this->rotation_in_rads = degreesToRadians(90) + current_yaw;
+					std::cout<<"Current Yaw: "<<current_yaw<<"\n";
+					this->set_shelf_pose(this->get_world_pose());
+				} else if(direction==1) {
+					//right	
+					std::cout<<"Rotating right\n";		
+					this->model->SetAngularVel(ignition::math::Vector3d(0, 0, INITIAL_ANGULAR_VELOCITY_RIGHT));
+					ignition::math::Pose3d pose = this->get_world_pose();
+					float current_yaw = this->get_yaw(pose);
+					this->rotation_in_rads = degreesToRadians(-90) + current_yaw;
+					std::cout<<"Current Yaw: "<<current_yaw<<"\n";
+					this->set_shelf_pose(this->get_world_pose());
+				} else {
+					std::cout<<"Invalid Direction Code "<<direction<<"\n";
+					this->rotation_in_rads = 0;
+				}
+				std::cout<<"Necessary Yaw: "<<this->rotation_in_rads<<"\n";
+				//Listen to update event.
+				this->updateConnection = event::Events::ConnectWorldUpdateBegin(std::bind(&KivaRotateCenterWithLoad::OnUpdate, this));	
 			} else {
-				std::cout<<"Invalid Direction Code "<<direction<<"\n";
-				this->rotation_in_rads = 0;
+				std::cout<<"Aborting!! Could not find shelf!"<<"\n";			
 			}
-			std::cout<<"Necessary Yaw: "<<this->rotation_in_rads<<"\n";
-			//Listen to update event.
-			this->updateConnection = event::Events::ConnectWorldUpdateBegin(std::bind(&KivaRotateCenterWithLoad::OnUpdate, this));	
-			
 		}
 		public: void OnUpdate() {
 			if (iterations<=NUMBER_OF_ITERATIONS) {
@@ -104,6 +109,10 @@ ignition::math::Pose3d pose = this->get_world_pose();
 			this->shelf->SetWorldPose(pose_shelf_new);
 			std::cout<<"Current Shelf Yaw: "<<this->get_yaw(this->shelf->WorldPose())<<"\n";		
 		} 
+		private: std::string get_shelf_name_for_model() {
+			std::string model_name = this->model->GetName();
+			return SHELF_PREFIX + model_name;	
+		}
 		// Define ptr to physics model
 		private: physics::ModelPtr model, shelf;
 		//Define world ptr for model

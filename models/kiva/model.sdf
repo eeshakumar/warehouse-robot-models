@@ -114,6 +114,8 @@
           				</box>
         				</geometry>
       			</collision>
+		</link>
+		<link name="tower_plate">
       			<visual name="tower_plate">
         				<pose>0 0 0.165 0 0 0</pose>
         				<geometry>
