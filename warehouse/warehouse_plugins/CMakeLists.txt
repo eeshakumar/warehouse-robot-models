@@ -8,3 +8,6 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${GAZEBO_CXX_FLAGS}")
 
 add_library(warehouse_plugin SHARED warehouse_plugin.cc)
 target_link_libraries(warehouse_plugin ${GAZEBO_LIBRARIES})
+
+add_executable(main load_worlds.cc)
+target_link_libraries(main ${GAZEBO_LIBRARIES} pthread)
