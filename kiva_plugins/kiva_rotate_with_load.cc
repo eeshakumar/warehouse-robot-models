@@ -4,17 +4,17 @@
 #include <gazebo/common/common.hh>
 #include <ignition/math/Vector3.hh>
 #define degreesToRadians(angleDegrees) ((angleDegrees) * M_PI / 180.0)
-#define INITIAL_ANGULAR_VELOCITY_LEFT 2
-#define INITIAL_ANGULAR_VELOCITY_RIGHT -2
+#define INITIAL_ANGULAR_VELOCITY_LEFT 0.5
+#define INITIAL_ANGULAR_VELOCITY_RIGHT -0.5
 #define CONTINUED_ANGULAR_VELOCITY_LEFT 0.25
 #define CONTINUED_ANGULAR_VELOCITY_RIGHT -0.25
-#define NUMBER_OF_ITERATIONS 50
+#define NUMBER_OF_ITERATIONS 150
 #define WORLD_STR "warehouse_rotate.world"
 
 namespace gazebo {
 	int iterations = 0;
-	class KivaRotateCenter: public ModelPlugin {
-		public: KivaRotateCenter() {}
+	class KivaRotateCenterWithLoad: public ModelPlugin {
+		public: KivaRotateCenterWithLoad() {}
 		public: virtual void Load(physics::ModelPtr _parent, sdf::ElementPtr _sdf) {
 			this->model = _parent;
 			this->sdf = _sdf;
@@ -48,7 +48,7 @@ namespace gazebo {
 			}
 			std::cout<<"Necessary Yaw: "<<this->rotation_in_rads<<"\n";
 			//Listen to update event.
-			this->updateConnection = event::Events::ConnectWorldUpdateBegin(std::bind(&KivaRotateCenter::OnUpdate, this));	
+			this->updateConnection = event::Events::ConnectWorldUpdateBegin(std::bind(&KivaRotateCenterWithLoad::OnUpdate, this));	
 			
 		}
 		public: void OnUpdate() {
@@ -118,5 +118,5 @@ ignition::math::Pose3d pose = this->get_world_pose();
 		private: int direction;
 	};
 	//Register Kiva Rotate Center for simulator
-	GZ_REGISTER_MODEL_PLUGIN(KivaRotateCenter)
+	GZ_REGISTER_MODEL_PLUGIN(KivaRotateCenterWithLoad)
 }
