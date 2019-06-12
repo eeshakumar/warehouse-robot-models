@@ -12,7 +12,8 @@
 #define WORLD_STR "warehouse_rotate.world"
 #define SHELF_PREFIX "shelf_"
 
-namespace gazebo {cd 
+namespace gazebo {
+	int iterations=0;
 	class KivaRotateCenterWithLoad: public ModelPlugin {
 		public: KivaRotateCenterWithLoad() {}
 		public: virtual void Load(physics::ModelPtr _parent, sdf::ElementPtr _sdf) {
@@ -26,6 +27,7 @@ namespace gazebo {cd
 			this->continued_angl_vel_left = CONTINUED_ANGULAR_VELOCITY_LEFT;
 			this->continued_angl_vel_right = CONTINUED_ANGULAR_VELOCITY_RIGHT;
 			this->direction = extract_direction();
+			
 			if(this->shelf!=NULL) {
 				if(this->direction==0) {
 					//left	
