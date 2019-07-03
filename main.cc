@@ -4,18 +4,26 @@
 #include <gazebo/common/common.hh>
 #include <gazebo/physics/physics.hh>
 
+
 #include <iostream>
 
 gazebo::physics::WorldPtr world;
+bool isLifted = false;
+int liftedShelf = 0;
 
 void liftObject(double x, double y)
 {
-    gazebo::physics::ModelPtr shelf = world->ModelByName("shelf");
-    ignition::math::Pose3d pose = shelf->WorldPose();
+    gazebo::physics::ModelPtr storage_unit = world->ModelByName("storage_unit");
+    ignition::math::Pose3d pose = storage_unit->WorldPose();
     pose = ignition::math::Pose3d(x, y, 0, 0, 0, 0);
-    shelf->SetWorldPose(pose);
+    storage_unit->SetWorldPose(pose);
 }
 
+bool isCloseTo(double yaw, double val){
+    if(yaw <= val+0.03 && yaw >= val-0.03)
+        return true;
+    return false;
+}
 
 void posesStampedCallback(ConstPosesStampedPtr &posesStamped)
 {
@@ -38,30 +46,38 @@ void posesStampedCallback(ConstPosesStampedPtr &posesStamped)
         kiva_y = position.y();
         kiva_z = position.z();
 
-      std::cout << "Read kiva position: x: " << kiva_x
-          << " y: " << kiva_y << " z: " << kiva_z << std::endl;
+     // std::cout << "Read kiva position: x: " << kiva_x << " y: "
+     //   << kiva_y << " z: " << kiva_z << std::endl;
     }
       
-    if (name == std::string("shelf"))
+    if (name == std::string("storage_unit"))
     {
         const ::gazebo::msgs::Vector3d &position = pose.position();
           
          shelf_x = position.x();
          shelf_y = position.y();
          shelf_z = position.z();
-          
-        std::cout << "Read shelf position: x: " << shelf_x
-          << " y: " << shelf_y << " z: " << shelf_z << std::endl;
+        
+      //  std::cout << "Read shelf position: x: " << shelf_x
+      //    << " y: " << shelf_y << " z: " << shelf_z << std::endl;
     }
-      gazebo::physics::ModelPtr shelf = world->ModelByName("shelf");
-      ignition::math::Pose3d newPose = shelf->WorldPose();
-      newPose = ignition::math::Pose3d(kiva_x, kiva_y, 0, 0, 0, 0);
-      shelf->SetWorldPose(newPose);
-    /*if((kiva_x - shelf_x) < 0.00001){
+    if(isCloseTo(shelf_x, kiva_x) && isCloseTo(shelf_y, kiva_y) && isLifted ){
           liftObject(kiva_x, kiva_y);
-          std::cout << "kiva can move object" << (kiva_x - shelf_x) << "\n";
-    }*/
+        //  std::cout << "kiva is moving shelf" << "\n";
+    }
   }
+}
+void OnMsg(ConstVector3dPtr &_msg){
+    int msg = _msg->x();
+    if (msg==0 && isLifted == 1){
+        std::cout << "not lifting anymore \n";
+        isLifted = 0;
+    } else if (msg==1 && isLifted == 0) {
+        std::cout << "lifting shelf \n";
+        isLifted = 1;
+    } else {
+        std::cout << "cannot lift shelf \n";
+    }
 }
 
 /////////////////////////////////////////////////
@@ -87,8 +103,11 @@ int main(int _argc, char **_argv)
     
     std::vector<gazebo::physics::ModelPtr> models = world->Models();
 
+     
+      // Subscribe to the topic, and register a callback
+    gazebo::transport::SubscriberPtr subLift = node->Subscribe("~/lift", OnMsg);
     gazebo::transport::SubscriberPtr sub = node->Subscribe("~/pose/info", posesStampedCallback);
-    gazebo::physics::ModelPtr shelf = world->ModelByName("shelf");
+    gazebo::physics::ModelPtr shelf = world->ModelByName("storage_unit");
     gazebo::physics::ModelPtr kiva = world->ModelByName("kiva");
     kiva->LoadPlugins();
     
@@ -108,3 +127,4 @@ int main(int _argc, char **_argv)
 
   return 0;
 }
+
