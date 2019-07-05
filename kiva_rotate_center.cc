@@ -31,9 +31,11 @@ namespace gazebo {
 	class KivaRotateCenter: public ModelPlugin {
 		public: KivaRotateCenter() {}
 		public: virtual void Load(physics::ModelPtr _parent, sdf::ElementPtr _sdf) {
-            std::cout << "Plugin Loaded \n";
+            
 			this->model = _parent;
 			this->sdf = _sdf;
+            
+            std::cout << "Plugin Loaded for: "<< model->GetName()<< "\n";
             
             this->node = transport::NodePtr(new transport::Node());
             #if GAZEBO_MAJOR_VERSION < 8
@@ -44,7 +46,7 @@ namespace gazebo {
     
             this->sub = this->node->Subscribe("~/kiva/mov", &KivaRotateCenter::OnMsg, this);
             
-            pub = node->Advertise<gazebo::msgs::Vector3d>("~/kiva/status");
+            pub = node->Advertise<gazebo::msgs::Vector3d>("~/"+model->GetName()+"/status");
           //  pub->WaitForConnection();
             
 			this->updateConnection = event::Events::ConnectWorldUpdateBegin(std::bind(&KivaRotateCenter::OnUpdate, this));
@@ -98,18 +100,18 @@ namespace gazebo {
                     }
 			//		std::cout<<"Current Yaw: " << current_yaw <<"\n";
 			//		std::cout<<"Achieved near rest angular vel :" << angular_vel<<"\n";
-					if(current_yaw-rotation_in_rads<0.01){
+					if(current_yaw-rotation_in_rads<0.01 || current_yaw-rotation_in_rads > 1){
 			//			std::cout<<"Rotating left again\n";
 						this->model->SetAngularVel(ignition::math::Vector3d(0, 0, continued_angl_vel_left));
 						//this->continued_angl_vel_left/=2;	
 						iterations++;
-					} else if(current_yaw-rotation_in_rads>0.01) {
-			//			std::cout<<"Rotating right again\n";
+					} else if(current_yaw-rotation_in_rads>0.01 || current_yaw-rotation_in_rads<-1) {
+				//		std::cout<<"Rotating right again\n";
 						this->model->SetAngularVel(ignition::math::Vector3d(0, 0, continued_angl_vel_right));
 						this->continued_angl_vel_left/=2;
 						iterations++;
 					} else {
-			//			std::cout<<"Achieved required yaw: "<<current_yaw<<"\n";
+				//		std::cout<<"Achieved required yaw: "<<current_yaw<<"\n";
                         started = false;
                         isRotating = false;
                         isMoving = true;
@@ -122,7 +124,7 @@ namespace gazebo {
 				std::cout<<"Reached maximum iterations!!\n";
                 ignition::math::Pose3d pose = this->get_world_pose();
 				float final_yaw = this->get_yaw(pose);
-			//	std::cout<<"Final Yaw: "<<final_yaw<<"\n";
+				std::cout<<"Final Yaw: "<<final_yaw<<"\n";
                 started = false;
                 isRotating = false;
                 isMoving = true;
@@ -171,6 +173,9 @@ namespace gazebo {
             ignition::math::Pose3d pose = this->get_world_pose();
             float current_yaw = this->get_yaw(pose);
             this->rotation_in_rads = degreesToRadians(90*numRotations) + current_yaw;
+            if(this->rotation_in_rads < -3.14) {
+                this->rotation_in_rads = this->rotation_in_rads + 6.28;
+            }
             std::cout<<"Current Yaw: "<<current_yaw<<"\n";
         } else if(direction==1) {
             //right
@@ -179,6 +184,9 @@ namespace gazebo {
             ignition::math::Pose3d pose = this->get_world_pose();
             float current_yaw = this->get_yaw(pose);
             this->rotation_in_rads = degreesToRadians(-90*numRotations) + current_yaw;
+            if(this->rotation_in_rads < -3.14) {
+                this->rotation_in_rads = this->rotation_in_rads + 6.28;
+            }
             std::cout<<"Current Yaw: "<<current_yaw<<"\n";
         } else {
             std::cout<<"Invalid Direction Code "<<direction<<"\n";
@@ -331,27 +339,32 @@ namespace gazebo {
     }
         
     private: void OnMsg(ConstVector3dPtr &_msg){
-        if(!isMovingOnX && !isMovingOnY){
-            distX = 0;
-            distY = 0;
-            int xCoord = _msg->x();
-            int yCoord = _msg->y();
-            ignition::math::Pose3d pose = this->get_world_pose();
-            double current_x = round(pose.Pos().X());
-            double current_y = round(pose.Pos().Y());
-            std::cout << "x coord of kiva " << current_x <<" y coord of kiva " << current_y << "\n";
-            if(!isCloseTo(xCoord, current_x)){
-                isMovingOnX = true;
-                distX = xCoord-current_x;
-            }
+        int kivaId = _msg->z();
+        if(model->GetName().compare("kiva_"+ std::to_string(kivaId))==0){
+            std::cout << "moving " << "kiva_"+ std::to_string(kivaId) << "\n";
             
-            if(!isCloseTo(yCoord, current_y)){
-                isMovingOnY = true;
-                distY = yCoord-current_y;
+            if(!isMovingOnX && !isMovingOnY){
+                distX = 0;
+                distY = 0;
+                int xCoord = _msg->x();
+                int yCoord = _msg->y();
+                ignition::math::Pose3d pose = this->get_world_pose();
+                double current_x = round(pose.Pos().X());
+                double current_y = round(pose.Pos().Y());
+                std::cout << "x coord of kiva " << current_x <<" y coord of kiva " << current_y << "\n";
+                if(!isCloseTo(xCoord, current_x)){
+                    isMovingOnX = true;
+                    distX = xCoord-current_x;
+                }
+                
+                if(!isCloseTo(yCoord, current_y)){
+                    isMovingOnY = true;
+                    distY = yCoord-current_y;
+                }
+                
+                std::cout << "x val " << xCoord <<" y val " << yCoord << "\n";
+                std::cout << "dist x " << distX <<" dist y " << distY << "\n";
             }
-            
-            std::cout << "x val " << xCoord <<" y val " << yCoord << "\n";
-            std::cout << "dist x " << distX <<" dist y " << distY << "\n";
         }
     }
         
