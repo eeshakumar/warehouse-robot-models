@@ -33,14 +33,16 @@ int main(int _argc, char **_argv)
 
   // Create a a vector3 message
   gazebo::msgs::Vector3d msg;
-
+if(_argc != 4){
+        std::cout << "Error in input \n";
+    }else {
   // Set the velocity in the x-component
 #if GAZEBO_MAJOR_VERSION < 6
   gazebo::msgs::Set(&msg, gazebo::math::Vector3(std::atof(_argv[1]), std::atof(_argv[2]), std::atof(_argv[3])));
 #else
   gazebo::msgs::Set(&msg, ignition::math::Vector3d(std::atof(_argv[1]), std::atof(_argv[2]), std::atof(_argv[3])));
 #endif
-
+    }
   // Send the message
   pub->Publish(msg);
 

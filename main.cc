@@ -4,7 +4,6 @@
 #include <gazebo/common/common.hh>
 #include <gazebo/physics/physics.hh>
 
-
 #include <iostream>
 
 gazebo::physics::WorldPtr world;
@@ -13,7 +12,7 @@ int liftedShelf = 0;
 
 void liftObject(double x, double y)
 {
-    gazebo::physics::ModelPtr storage_unit = world->ModelByName("storage_unit");
+    gazebo::physics::ModelPtr storage_unit = world->ModelByName("storage_unit_"+std::to_string(liftedShelf));
     ignition::math::Pose3d pose = storage_unit->WorldPose();
     pose = ignition::math::Pose3d(x, y, 0, 0, 0, 0);
     storage_unit->SetWorldPose(pose);
@@ -49,17 +48,18 @@ void posesStampedCallback(ConstPosesStampedPtr &posesStamped)
     //  std::cout << "Read kiva position: x: " << kiva_x << " y: "
      //   << kiva_y << " z: " << kiva_z << std::endl;
     }
-      
-    if (name == std::string("storage_unit"))
+  
+    if (name == std::string("storage_unit_"+std::to_string(liftedShelf)))
     {
+     // std::cout << std::string("storage_unit_"+std::to_string(liftedShelf)) << std::endl;
         const ::gazebo::msgs::Vector3d &position = pose.position();
           
          shelf_x = position.x();
          shelf_y = position.y();
          shelf_z = position.z();
         
-  //      std::cout << "Read shelf position: x: " << shelf_x
-   //       << " y: " << shelf_y << " z: " << shelf_z << std::endl;
+     //   std::cout << "Read shelf position: x: " << shelf_x
+     //     << " y: " << shelf_y << " z: " << shelf_z << std::endl;
     }
     if(isLifted){
         if(isCloseTo(shelf_x, kiva_x) && isCloseTo(shelf_y, kiva_y) && isLifted ){
@@ -71,12 +71,16 @@ void posesStampedCallback(ConstPosesStampedPtr &posesStamped)
 }
 void OnMsg(ConstVector3dPtr &_msg){
     int msg = _msg->x();
+    int kivaId = _msg->y();
+    int shelfId = _msg->z();
     if (msg==0 && isLifted == 1){
         std::cout << "not lifting anymore \n";
         isLifted = 0;
+        liftedShelf = 0;
     } else if (msg==1 && isLifted == 0) {
         std::cout << "lifting shelf \n";
         isLifted = 1;
+        liftedShelf = shelfId;
     } else {
         std::cout << "cannot lift shelf \n";
     }
