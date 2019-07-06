@@ -53,12 +53,13 @@ namespace gazebo {
 		public: void OnUpdate() {
            
             gazebo::msgs::Vector3d publisherMsg;
-            
+            ignition::math::Pose3d pose = this->get_world_pose();
+					
             if(isMovingOnX || isMovingOnY || isRotating) { //Check if kiva is moving -> set status to 1 (busy)
                 #if GAZEBO_MAJOR_VERSION < 6
-                gazebo::msgs::Set(&publisherMsg, gazebo::math::Vector3(1, 0, 0));
+                gazebo::msgs::Set(&publisherMsg, gazebo::math::Vector3(1, pose.Pos().X(), pose.Pos().Y()));
                 #else
-                gazebo::msgs::Set(&publisherMsg, ignition::math::Vector3d(1, 0, 0));
+                gazebo::msgs::Set(&publisherMsg, ignition::math::Vector3d(1, pose.Pos().X(), pose.Pos().Y()));
                 #endif
             } else { //Kiva is idle -> set status to 0 (idle)
                 #if GAZEBO_MAJOR_VERSION < 6
@@ -92,7 +93,6 @@ namespace gazebo {
 			if (iterations<=(NUMBER_OF_ITERATIONS*numRotations)) {
                 ignition::math::Vector3d angular_vel = this->get_angular_vel();
 				if (angular_vel[2]<0.01 && angular_vel[2]>-0.01) {
-					ignition::math::Pose3d pose = this->get_world_pose();
 					float current_yaw = radiansToDegrees(this->get_yaw(pose));
                     
 				//	std::cout<<"Current Yaw: " << current_yaw <<"\n";
