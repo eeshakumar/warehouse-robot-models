@@ -17,25 +17,28 @@ int main(int _argc, char **_argv)
   gazebo::client::setup(_argc, _argv);
   #endif
 
-  gazebo::transport::NodePtr node(new gazebo::transport::Node());
-  node->Init();
+ if(_argc != 4){
+    std::cout << "Error in input \n";
+  } 
+  else {
+    gazebo::transport::NodePtr node(new gazebo::transport::Node());
+    node->Init();
+    std::string topicName = "~/kiva/mov";
+    std::cout << topicName << std::endl;
+    gazebo::transport::PublisherPtr pub = node->Advertise<gazebo::msgs::Vector3d>(topicName);
 
-  gazebo::transport::PublisherPtr pub =
-    node->Advertise<gazebo::msgs::Vector3d>("~/kiva/mov");
+    pub->WaitForConnection();
 
-  pub->WaitForConnection();
-
-  gazebo::msgs::Vector3d msg;
-    if(_argc != 4){
-        std::cout << "Error in input \n";
-    } else {
-      #if GAZEBO_MAJOR_VERSION < 6
-      gazebo::msgs::Set(&msg, gazebo::math::Vector3(std::atof(_argv[1]), std::atof(_argv[2]), std::atof(_argv[3])));
-      #else
-      gazebo::msgs::Set(&msg, ignition::math::Vector3d(std::atof(_argv[1]), std::atof(_argv[2]), std::atof(_argv[3])));
-      #endif
-    }
-  pub->Publish(msg);
+    gazebo::msgs::Vector3d msg;
+    
+    #if GAZEBO_MAJOR_VERSION < 6
+    gazebo::msgs::Set(&msg, gazebo::math::Vector3(std::atof(_argv[1]), std::atof(_argv[2]), std::atof(_argv[3])));
+    #else
+    gazebo::msgs::Set(&msg, ignition::math::Vector3d(std::atof(_argv[1]), std::atof(_argv[2]), std::atof(_argv[3])));
+    #endif
+    pub->Publish(msg);
+  }
+  
 
   #if GAZEBO_MAJOR_VERSION < 6
   gazebo::shutdown();

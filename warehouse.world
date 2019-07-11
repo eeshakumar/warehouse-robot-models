@@ -18,7 +18,7 @@
 			<uri>model://kiva</uri>
 			<pose>3 3 0 0 0 0</pose>
 			<name>kiva_2</name>
-		</include>	
+		</include>
 		<include>
 			<uri>model://storage_unit</uri>
 			<pose>0 0 0 0 0 0</pose>
