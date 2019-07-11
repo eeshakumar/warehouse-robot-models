@@ -2,18 +2,15 @@
 #include <gazebo/transport/transport.hh>
 #include <gazebo/msgs/msgs.hh>
 
-// Gazebo's API has changed between major releases. These changes are
-// accounted for with #if..#endif blocks in this file.
 #if GAZEBO_MAJOR_VERSION < 6
 #include <gazebo/gazebo.hh>
 #else
 #include <gazebo/gazebo_client.hh>
 #endif
 
-/////////////////////////////////////////////////
+
 int main(int _argc, char **_argv)
 {
-    // Load gazebo as a client
 #if GAZEBO_MAJOR_VERSION < 6
     gazebo::setupClient(_argc, _argv);
 #else

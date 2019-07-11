@@ -10,7 +10,7 @@
 #define INITIAL_ANGULAR_VELOCITY_RIGHT -2
 #define CONTINUED_ANGULAR_VELOCITY_LEFT 0.25
 #define CONTINUED_ANGULAR_VELOCITY_RIGHT -0.25
-#define NUMBER_OF_ITERATIONS 200
+#define NUMBER_OF_ITERATIONS 100
 #define X_AXIS 0
 #define Y_AXIS 1
 
@@ -63,9 +63,9 @@ namespace gazebo {
                 #endif
             } else { //Kiva is idle -> set status to 0 (idle)
                 #if GAZEBO_MAJOR_VERSION < 6
-                gazebo::msgs::Set(&publisherMsg, gazebo::math::Vector3(0, 0, 0));
+                gazebo::msgs::Set(&publisherMsg, gazebo::math::Vector3(0, pose.Pos().X(), pose.Pos().Y()));
                 #else
-                gazebo::msgs::Set(&publisherMsg, ignition::math::Vector3d(0, 0, 0));
+                gazebo::msgs::Set(&publisherMsg, ignition::math::Vector3d(0, pose.Pos().X(), pose.Pos().Y()));
                 #endif
             }
             
@@ -97,16 +97,16 @@ namespace gazebo {
                     
 				//	std::cout<<"Current Yaw: " << current_yaw <<"\n";
 				//	std::cout<<"Achieved near rest angular vel :" << angular_vel<<"\n";
-					if(current_yaw-rotation<0.005){
+					if(current_yaw-rotation<0.1){
 				//		std::cout<<"Rotating left again\n";
 						this->model->SetAngularVel(ignition::math::Vector3d(0, 0, continued_angl_vel_left));
 						//this->continued_angl_vel_left/=2;	
 						iterations++;
-					} else if(current_yaw-rotation>0.005) {
+					} else if(current_yaw-rotation>0.1) {
 				//		std::cout<<"Rotating right again\n";
 						this->model->SetAngularVel(ignition::math::Vector3d(0, 0, continued_angl_vel_right));
 						this->continued_angl_vel_left/=2;
-						iterations++;
+			            iterations++;
 					} else {
 				//		std::cout<<"Achieved required yaw: "<<current_yaw<<"\n";
                         started = false;
@@ -181,7 +181,9 @@ namespace gazebo {
             ignition::math::Pose3d pose = this->get_world_pose();
             float current_yaw = radiansToDegrees(this->get_yaw(pose));
             this->rotation = closestDegree((int)round(current_yaw - (90*numRotations)) % 360);
-
+            if(isCloseToDegrees(current_yaw, 270) && (this->rotation == 0 || this->rotation == 360)){
+                this->rotation = 359;
+            }
             std::cout<<"Current Yaw: "<<current_yaw<<"\n";
         } else {
             std::cout<<"Invalid Direction Code "<<direction<<"\n";
@@ -226,7 +228,6 @@ namespace gazebo {
             return 1;
         }
         else if(isCloseToDegrees(yaw, 270) && dest > 0){
-            // TODO: 270ten dönerken hata var
             isRotating = true;
             numRotations = 1;
             return 0;
@@ -352,7 +353,7 @@ namespace gazebo {
     public: int closestDegree(double deg){
         std::cout << "closest degree to calculate: " << deg << "\n";
         if(isCloseToDegrees(deg, 0)){
-            return 1;
+            return 0;
         } 
         if(isCloseToDegrees(deg, -90)){
             return 270;

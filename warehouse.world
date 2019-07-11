@@ -13,10 +13,15 @@
 			<uri>model://kiva</uri>
 			<pose>0 0 0 0 0 0</pose>
 			<name>kiva_1</name>
+		</include>
+		<include>
+			<uri>model://kiva</uri>
+			<pose>3 3 0 0 0 0</pose>
+			<name>kiva_2</name>
 		</include>	
 		<include>
 			<uri>model://storage_unit</uri>
-			<pose>1 1 0 0 0 0</pose>
+			<pose>0 0 0 0 0 0</pose>
 			<name>storage_unit_1</name>
 		</include>	
 		<include>
