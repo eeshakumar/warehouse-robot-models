@@ -132,8 +132,8 @@ int main(int _argc, char **_argv)
     gazebo::physics::ModelPtr shelf = world->ModelByName("storage_unit");
     gazebo::physics::ModelPtr kiva_1 = world->ModelByName("kiva_1");
     kiva_1->LoadPlugins();
-    gazebo::physics::ModelPtr kiva_2 = world->ModelByName("kiva_2");
-    kiva_2->LoadPlugins();
+    /* gazebo::physics::ModelPtr kiva_2 = world->ModelByName("kiva_2");
+    kiva_2->LoadPlugins(); */
       
     while (true)
     {
