@@ -32,11 +32,11 @@
 			<name>kiva_2</name>
 			<pose>0 0 0 0 0 0</pose>
 		</include>-->
-		<include>
-			<uri>model://./models/kiva</uri>
+		<!--<include>
+			<uri>model://kiva</uri>
 			<!--<name>kiva_3</name>-->
 			<!--<pose>-2 -2 0 0 0 0</pose>-->
-		</include>
+		</include> -->
 		<!--<plugin name="warehouse_plugin" filename="./warehouse_plugins/build/libwarehouse_plugin.so">
 			<shelves>10</shelves>
 		</plugin>-->
