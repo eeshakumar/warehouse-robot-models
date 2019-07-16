@@ -177,8 +177,8 @@
         			<child>tower_plate</child>
         			<parent>tower</parent>
       		</joint>
-            <plugin name="kiva_plugin" filename="libkiva_plugin.so">
-                <dist>1.0</dist>
+            <plugin name="kiva_rotate_center" filename="libkiva_rotate_center.so">
+                <direction>0</direction>
             </plugin>
 		</model>
 </sdf>
