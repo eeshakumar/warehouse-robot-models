@@ -16,23 +16,43 @@
 		</include>
 		<include>
 			<uri>model://kiva</uri>
-			<pose>3 3 0 0 0 0</pose>
+			<pose>2 1 0 0 0 0</pose>
 			<name>kiva_2</name>
 		</include>
 		<include>
 			<uri>model://storage_unit</uri>
-			<pose>0 0 0 0 0 0</pose>
+			<pose>2 0 0 0 0 0</pose>
 			<name>storage_unit_1</name>
 		</include>	
 		<include>
 			<uri>model://storage_unit</uri>
-			<pose>-1 2 0 0 0 0</pose>
+			<pose>1 2 0 0 0 0</pose>
 			<name>storage_unit_2</name>
 		</include>	
 		<include>
 			<uri>model://storage_unit</uri>
-			<pose>3 -2 0 0 0 0</pose>
+			<pose>-1 2 0 0 0 0</pose>
 			<name>storage_unit_3</name>
-		</include>	
+		</include>
+		<model name="my_model">
+  <pose>3 5.2 0 0 0 0</pose>
+  <static>true</static>
+    <link name="link">
+      <collision name="collision">
+        <geometry>
+          <box>
+            <size>5 0.5 0.2</size>
+          </box>
+        </geometry>
+      </collision>
+      <visual name="visual">
+        <geometry>
+          <box>
+            <size>5 0.5 0.2</size>
+          </box>
+        </geometry>
+      </visual>
+    </link>
+  </model>
 	</world>
 </sdf>

@@ -17,30 +17,23 @@
 #define Y_AXIS 1
 
 namespace gazebo {
-   // double init_x, init_y;
     std::map<int, double> init_x;
     std::map<int, double> init_y;
-	//double distX = 0;
-    //double distY = 0;
     std::map<int, double> distX;
     std::map<int, double> distY;
-    //bool started = false;
     std::map<int, bool> started;
-	//int iterations = 0;
-    //int numRotations = 0;
     std::map<int, int> iterations;
     std::map<int, int> numRotations;
-    //bool isRotating = false;
-    //bool isMovingOnX = false;
-    //bool isMovingOnY = false;
-    //bool isBusy = false;
+    std::map<int, int> rotation;
     std::map<int, bool> isBusy;
     std::map<int, bool> isRotating;
     std::map<int, bool> isMovingOnX;
     std::map<int, bool> isMovingOnY;
-    //int movingOn = -1;
     std::map<int, int> movingOn;
-    //int kivaId = 0;
+    std::map<int, bool> isBlocked;
+    std::map<int, int> direction;
+    std::map<int, float> continued_angl_vel_left;
+    std::map<int, float> continued_angl_vel_right;
     gazebo::transport::PublisherPtr pub;
     
 	class KivaRotateCenter: public ModelPlugin {
@@ -60,7 +53,8 @@ namespace gazebo {
             #endif
     
             this->sub = this->node->Subscribe("~/kiva/mov", &KivaRotateCenter::OnMsg, this);
-            std::cout << "Plugin Loaded for: "<<" ~/kiva/mov" << "\n";
+            this->collisionSub = this->node->Subscribe("~/" +model->GetName() +"/chassis/laser/scan", &KivaRotateCenter::OnCollision, this);
+      
             pub = node->Advertise<gazebo::msgs::Vector3d>("~/"+model->GetName()+"/status");
             
 			this->updateConnection = event::Events::ConnectWorldUpdateBegin(std::bind(&KivaRotateCenter::OnUpdate, this));
@@ -79,14 +73,21 @@ namespace gazebo {
                         #else
                         gazebo::msgs::Set(&publisherMsg, ignition::math::Vector3d(1, pose.Pos().X(), pose.Pos().Y()));
                         #endif
-                    } else { //Kiva is idle -> set status to 0 (idle)
+                    } else if(isBlocked[kivaId]){ //kiva couldn't move to previous location because it was blocked -> set status to 2 (error) 
+                        #if GAZEBO_MAJOR_VERSION < 6
+                        gazebo::msgs::Set(&publisherMsg, gazebo::math::Vector3(2, pose.Pos().X(), pose.Pos().Y()));
+                        #else
+                        gazebo::msgs::Set(&publisherMsg, ignition::math::Vector3d(2, pose.Pos().X(), pose.Pos().Y()));
+                        #endif
+                    } 
+                    else { //Kiva is idle -> set status to 0 (idle)
                         #if GAZEBO_MAJOR_VERSION < 6
                         gazebo::msgs::Set(&publisherMsg, gazebo::math::Vector3(0, pose.Pos().X(), pose.Pos().Y()));
                         #else
                         gazebo::msgs::Set(&publisherMsg, ignition::math::Vector3d(0, pose.Pos().X(), pose.Pos().Y()));
                         #endif
                     }
-                    
+
                     pub->Publish(publisherMsg);
                     
                     int dir = -1;
@@ -99,6 +100,7 @@ namespace gazebo {
                     } else if(isMovingOnY[kivaId] && !isBusy[kivaId]){
                         std::cout << "Orienting on y \n";
                         dir = orientY(distY[kivaId], kivaId);
+                        std::cout << dir << std::endl;
                         isBusy[kivaId] = true;
                         movingOn[kivaId] = Y_AXIS;
                     }
@@ -107,26 +109,26 @@ namespace gazebo {
                             iterations[kivaId] = 0;
                             start_rotate(dir, numRotations[kivaId], kivaId);
                             started[kivaId] = true;
+                             std::cout<<"this Yaw: " << rotation[kivaId] << "\n";
                         }
                     if (iterations[kivaId]<=(NUMBER_OF_ITERATIONS*numRotations[kivaId])) {
                         ignition::math::Vector3d angular_vel = this->get_angular_vel();
                         if (angular_vel[2]<0.01 && angular_vel[2]>-0.01) {
                             float current_yaw = radiansToDegrees(this->get_yaw(pose));
                             
-                        //    std::cout<<"Current Yaw: " << current_yaw <<"\n";
-                        //   std::cout<<"Achieved near rest angular vel :" << angular_vel<<"\n";
-                            if(current_yaw-rotation<0.1){
-                        //		std::cout<<"Rotating left again\n";
-                                this->model->SetAngularVel(ignition::math::Vector3d(0, 0, continued_angl_vel_left));
-                                //this->continued_angl_vel_left/=2;	
+                            std::cout<<"Current Yaw: " << current_yaw <<"\n";
+                            std::cout<<"Final Yaw: " << rotation[kivaId] << "\n";
+                            std::cout<<"Achieved near rest angular vel :" << angular_vel <<"\n";
+                            if(current_yaw-rotation[kivaId]<0.1){
+                        		std::cout<<"Rotating left again\n";
+                                this->model->SetAngularVel(ignition::math::Vector3d(0, 0, continued_angl_vel_left[kivaId]));
                                 iterations[kivaId]++;
-                            } else if(current_yaw-rotation>0.1) {
-                        //		std::cout<<"Rotating right again\n";
-                                this->model->SetAngularVel(ignition::math::Vector3d(0, 0, continued_angl_vel_right));
-                                this->continued_angl_vel_left/=2;
+                            } else if(current_yaw-rotation[kivaId]>0.1) {
+                        		std::cout<<"Rotating right again\n";
+                                this->model->SetAngularVel(ignition::math::Vector3d(0, 0, continued_angl_vel_right[kivaId]));
                                 iterations[kivaId]++;
                             } else {
-                        //		std::cout<<"Achieved required yaw: "<<current_yaw<<"\n";
+                        		std::cout<<"Achieved required yaw: "<<current_yaw<<"\n";
                                 started[kivaId] = false;
                                 isRotating[kivaId] = false;
                                 isMoving = true;
@@ -159,13 +161,6 @@ namespace gazebo {
             }
 		}
         
-		private: int extract_direction() {
-			int direction = -1;
-			if(this->sdf->HasElement("direction")) {
-				direction = this->sdf->Get<int>("direction");
-			}
-			return direction;		
-		}
 		private: float get_yaw(ignition::math::Pose3d pose) {
 			return pose.Rot().Yaw();		 
 		}
@@ -178,37 +173,39 @@ namespace gazebo {
         
     private: void start_rotate(int dir, int numRotations, int kivaId){
         ignition::math::Pose3d pose = this->get_world_pose();
-        this->continued_angl_vel_left = CONTINUED_ANGULAR_VELOCITY_LEFT;
-        this->continued_angl_vel_right = CONTINUED_ANGULAR_VELOCITY_RIGHT;
+        continued_angl_vel_left[kivaId] = CONTINUED_ANGULAR_VELOCITY_LEFT;
+        continued_angl_vel_right[kivaId] = CONTINUED_ANGULAR_VELOCITY_RIGHT;
         std::cout<< "kiva will rotate: " << dir << " " << numRotations << "times\n";
-        if(isRotating[kivaId] ) this->direction = dir;
-        if(direction==0) {
+        if(isRotating[kivaId] ) direction[kivaId] = dir;
+        if(direction[kivaId]==0) {
             //left
             std::cout<<"Rotating left\n";
             this->model->SetAngularVel(ignition::math::Vector3d(0, 0, INITIAL_ANGULAR_VELOCITY_LEFT));
             ignition::math::Pose3d pose = this->get_world_pose();
             float current_yaw = radiansToDegrees(this->get_yaw(pose));
-            this->rotation = closestDegree((int)round((90*numRotations) + current_yaw) % 360);
-            if(isCloseToDegrees(current_yaw, 270) && (this->rotation == 0 || this->rotation == 360)){
-                this->rotation = 359;
+            rotation[kivaId] = closestDegree((int)round((90*numRotations) + current_yaw) % 360);
+            if(isCloseToDegrees(current_yaw, 270) && (rotation[kivaId] == 0 || rotation[kivaId] == 360)){
+                rotation[kivaId] = 359;
             }
+
             std::cout<<"Current Yaw: "<<current_yaw<<"\n";
-        } else if(direction==1) {
+        } else if(direction[kivaId]==1) {
             //right
             std::cout<<"Rotating right\n";
             this->model->SetAngularVel(ignition::math::Vector3d(0, 0, INITIAL_ANGULAR_VELOCITY_RIGHT));
             ignition::math::Pose3d pose = this->get_world_pose();
             float current_yaw = radiansToDegrees(this->get_yaw(pose));
-            this->rotation = closestDegree((int)round(current_yaw - (90*numRotations)) % 360);
-            if(isCloseToDegrees(current_yaw, 270) && (this->rotation == 0 || this->rotation == 360)){
-                this->rotation = 359;
-            }
+            rotation[kivaId] = closestDegree((int)round(current_yaw - (90*numRotations)) % 360);
+
+            if(isCloseToDegrees(current_yaw, 90) && (rotation[kivaId] == 0 || rotation[kivaId] == 360)){
+                rotation[kivaId] = 1;
+            } 
             std::cout<<"Current Yaw: "<<current_yaw<<"\n";
         } else {
-            std::cout<<"Invalid Direction Code "<<direction<<"\n";
-            this->rotation = 0;
+            std::cout<<"Invalid Direction Code "<<direction[kivaId]<<"\n";
+            rotation[kivaId] = 0;
         }
-        std::cout<<"Necessary Yaw: "<<this->rotation<<"\n";
+        std::cout<<"Necessary Yaw: "<<rotation[kivaId]<<"\n";
     }
         
     public: int orientX(int dest, int kivaId) {
@@ -216,11 +213,7 @@ namespace gazebo {
         double x = pose.Pos().X();
         double yaw = radiansToDegrees(get_yaw(pose));
         std::cout<<"x: "<<x << "yaw: "<< yaw<< "\n";
-        if(abs(x - dest) < 0.01){
-            isRotating[kivaId]  = false;
-            isMovingOnX[kivaId]  = false;
-            return -1;
-        }
+
         if((isCloseToDegrees(yaw, 0) || isCloseToDegrees(yaw, 359)) && dest < 0){
             numRotations[kivaId] = 2;
             isRotating[kivaId]  = true;
@@ -260,11 +253,6 @@ namespace gazebo {
     public: int orientY(int dest, int kivaId) {
         ignition::math::Pose3d pose = this->get_world_pose();
         double y = pose.Pos().Y();
-        if(abs(y - dest) < 0.01){
-            isRotating[kivaId] = false;
-            isMovingOnY[kivaId] = false;
-            return -1;
-        }
         double yaw = radiansToDegrees(get_yaw(pose));
         std::cout<<"dest: "<<dest <<" y: "<<y << "yaw: "<< yaw << "\n";
         if((isCloseToDegrees(yaw, 0) || isCloseToDegrees(yaw, 359)) && dest < 0){
@@ -310,13 +298,18 @@ namespace gazebo {
         this->model->GetJoint("right_back_wheel_hinge")->SetVelocity(0, 5.0);
     
         double x = pose.Pos().X();
-        
-        if(abs(x - init_x[kivaId]) >= 1 * abs(dist)){
-        
+
+        if(abs(x - init_x[kivaId]) >= 1 * abs(dist) || isBlocked[kivaId]){
+            if(isBlocked[kivaId]){
+                std::cout << "kiva " << kivaId << "is blocked"<< std::endl;
+                isMovingOnY[kivaId] = false;
+                isBusy[kivaId] = false;
+            }
             this->model->GetJoint("left_front_wheel_hinge")->SetVelocity(0, 0.0);
             this->model->GetJoint("right_front_wheel_hinge")->SetVelocity(0, 0.0);
             this->model->GetJoint("left_back_wheel_hinge")->SetVelocity(0, 0.0);
             this->model->GetJoint("right_back_wheel_hinge")->SetVelocity(0, 0.0);
+            
             isMovingOnX[kivaId] = false;
             isBusy[kivaId] = false;
             movingOn[kivaId] = -1;
@@ -335,7 +328,12 @@ namespace gazebo {
         
         double y = pose.Pos().Y();
         
-        if(abs(y - init_y[kivaId]) >= 1 * abs(dist)){
+        // std::cout << isBlocked[kivaId] << std::endl;
+        if(abs(y - init_y[kivaId]) >= 1 * abs(dist) || isBlocked[kivaId]){
+            if(isBlocked[kivaId]){
+                isBusy[kivaId] = false;
+                std::cout << "kiva " << kivaId << "is blocked"<< std::endl;
+            }
             this->model->GetJoint("left_front_wheel_hinge")->SetVelocity(0, 0.0);
             this->model->GetJoint("right_front_wheel_hinge")->SetVelocity(0, 0.0);
             this->model->GetJoint("left_back_wheel_hinge")->SetVelocity(0, 0.0);
@@ -411,7 +409,7 @@ namespace gazebo {
                 std::cout << "x coord of kiva " << current_x <<" y coord of kiva " << current_y << "\n";
                 if(!isCloseTo(xCoord, current_x)){
                     isMovingOnX[kivaId] = true;
-                    distX[kivaId] = xCoord-current_x;
+                    distX[kivaId] = xCoord-current_x; 
                 }
                 
                 if(!isCloseTo(yCoord, current_y)){
@@ -424,21 +422,33 @@ namespace gazebo {
             }
         }
     }
+
+    void OnCollision(ConstLaserScanStampedPtr &_msg){
+        ::google::protobuf::int32 sec = _msg->time().sec();
+        ::google::protobuf::int32 nsec = _msg->time().nsec();
+        // std::cout << "Read time: sec: " << sec << " nsec: " << nsec << std::endl;
         
-	
+        ::gazebo::msgs::LaserScan scan = _msg->scan();
+        int kivaId = std::stoi(scan.frame().substr(5,6));
+        for(int i=0; i < scan.count(); i++){
+            if(scan.ranges(i)<0.7){
+               // std::cout << kivaId << " Scan: " << scan.ranges(i) << std::endl;
+                isBlocked[kivaId] = true;
+            } else {
+                isBlocked[kivaId] = false;
+            }
+        }   
+    }
+    
 		private: physics::ModelPtr model;
 		
 		private: event::ConnectionPtr updateConnection;
 		
 		private: sdf::ElementPtr sdf;
-		
-		private: float rotation, continued_angl_vel_left, continued_angl_vel_right;
-		
-		private: int direction;
 
         private: transport::NodePtr node;
-        
         private: transport::SubscriberPtr sub;
+        private: transport::SubscriberPtr collisionSub;
 	};
 
 	GZ_REGISTER_MODEL_PLUGIN(KivaRotateCenter)
