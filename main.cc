@@ -42,7 +42,7 @@ void posesStampedCallback(ConstPosesStampedPtr &posesStamped)
     std::map<int, int>::iterator itr;
    // std::cout << "iterator position:" << liftingMap.begin() << std::endl; 
     for (itr = liftingMap.begin(); itr != liftingMap.end(); ++itr) {  
-      // std::cout << "mapping " << itr->first << "to " << itr->second << std::endl; 
+      std::cout << "mapping " << itr->first << "to " << itr->second << std::endl; 
       if (name.compare(std::string("kiva_"+std::to_string(itr->first)))==0)
       {
         const ::gazebo::msgs::Vector3d &position = pose.position();

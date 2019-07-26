@@ -35,7 +35,8 @@ namespace gazebo {
     std::map<int, float> continued_angl_vel_left;
     std::map<int, float> continued_angl_vel_right;
     gazebo::transport::PublisherPtr pub;
-    
+    int dir = -1;
+
 	class KivaRotateCenter: public ModelPlugin {
 		public: KivaRotateCenter() {}
 		public: virtual void Load(physics::ModelPtr _parent, sdf::ElementPtr _sdf) {
@@ -54,7 +55,11 @@ namespace gazebo {
     
             this->sub = this->node->Subscribe("~/kiva/mov", &KivaRotateCenter::OnMsg, this);
             this->collisionSub = this->node->Subscribe("~/" +model->GetName() +"/chassis/laser/scan", &KivaRotateCenter::OnCollision, this);
-      
+            this->xSub = this->node->Subscribe("~/kiva/movx", &KivaRotateCenter::OnMsgX, this);
+            this->ySub = this->node->Subscribe("~/kiva/movy", &KivaRotateCenter::OnMsgY, this);
+            this->rotSub = this->node->Subscribe("~/kiva/rot", &KivaRotateCenter::OnMsgRot, this);
+            
+
             pub = node->Advertise<gazebo::msgs::Vector3d>("~/"+model->GetName()+"/status");
             
 			this->updateConnection = event::Events::ConnectWorldUpdateBegin(std::bind(&KivaRotateCenter::OnUpdate, this));
@@ -90,7 +95,6 @@ namespace gazebo {
 
                     pub->Publish(publisherMsg);
                     
-                    int dir = -1;
                     bool isMoving = false;
                     if(isMovingOnX[kivaId] && !isBusy[kivaId]){
                         std::cout << "Orienting on x \n";
@@ -176,7 +180,7 @@ namespace gazebo {
         continued_angl_vel_left[kivaId] = CONTINUED_ANGULAR_VELOCITY_LEFT;
         continued_angl_vel_right[kivaId] = CONTINUED_ANGULAR_VELOCITY_RIGHT;
         std::cout<< "kiva will rotate: " << dir << " " << numRotations << "times\n";
-        if(isRotating[kivaId] ) direction[kivaId] = dir;
+        if(isRotating[kivaId]) direction[kivaId] = dir;
         if(direction[kivaId]==0) {
             //left
             std::cout<<"Rotating left\n";
@@ -347,7 +351,7 @@ namespace gazebo {
     }
         
     public: bool isCloseToDegrees(double degrees, double val){
-        if(degrees <= val+1 && degrees >= val-1)
+        if(degrees <= val+2 && degrees >= val-2)
             return true;
         return false;
     }
@@ -423,6 +427,54 @@ namespace gazebo {
         }
     }
 
+    private: void OnMsgX(ConstVector3dPtr &_msg){
+        int kivaId = _msg->x();
+        if(model->GetName().compare("kiva_"+ std::to_string(kivaId))==0){
+            if(!isMovingOnX[kivaId] && !isMovingOnY[kivaId]){
+                isMovingOnX[kivaId] = false;
+                isMovingOnY[kivaId] = false;
+                distX[kivaId] = 0;
+                distY[kivaId] = 0;
+                int xCoord = _msg->y();
+                ignition::math::Pose3d pose = this->get_world_pose();
+                double current_x = round(pose.Pos().X());
+                if(!isCloseTo(xCoord, current_x)){
+                    isMovingOnX[kivaId] = true;
+                    distX[kivaId] = xCoord; 
+                }
+            }
+        }
+    }
+
+    private: void OnMsgY(ConstVector3dPtr &_msg){
+        int kivaId = _msg->x();
+        if(model->GetName().compare("kiva_"+ std::to_string(kivaId))==0){
+            if(!isBusy[kivaId]){
+                isMovingOnX[kivaId] = false;
+                isMovingOnY[kivaId] = false;
+                distX[kivaId] = 0;
+                distY[kivaId] = 0;
+                int yCoord = _msg->y();
+                ignition::math::Pose3d pose = this->get_world_pose();
+                double current_y = round(pose.Pos().Y());
+                if(!isCloseTo(yCoord, current_y)){
+                    isMovingOnY[kivaId] = true;
+                    distY[kivaId] = yCoord;
+                }
+            }
+        }
+    }
+
+    private: void OnMsgRot(ConstVector3dPtr &_msg){
+        int kivaId = _msg->x();
+        if(model->GetName().compare("kiva_"+ std::to_string(kivaId))==0){
+            if(!isBusy[kivaId]){
+                dir = _msg->y();
+                isRotating[kivaId] = true;
+            }
+        }
+    }
+
     void OnCollision(ConstLaserScanStampedPtr &_msg){
         ::google::protobuf::int32 sec = _msg->time().sec();
         ::google::protobuf::int32 nsec = _msg->time().nsec();
@@ -448,6 +500,9 @@ namespace gazebo {
 
         private: transport::NodePtr node;
         private: transport::SubscriberPtr sub;
+        private: transport::SubscriberPtr xSub;
+        private: transport::SubscriberPtr ySub;
+        private: transport::SubscriberPtr rotSub;
         private: transport::SubscriberPtr collisionSub;
 	};
 

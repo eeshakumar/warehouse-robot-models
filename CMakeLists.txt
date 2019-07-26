@@ -24,6 +24,39 @@ else()
   target_link_libraries(mov ${GAZEBO_LIBRARIES})
 endif()
 
+add_executable(movx movx.cc)
+
+if (${gazebo_VERSION_MAJOR} LESS 6)
+  # These two
+  include(FindBoost)
+  find_package(Boost ${MIN_BOOST_VERSION} REQUIRED system filesystem regex)
+  target_link_libraries(movx ${GAZEBO_LIBRARIES} ${Boost_LIBRARIES})
+else()
+  target_link_libraries(movx ${GAZEBO_LIBRARIES})
+endif()
+
+add_executable(movy movy.cc)
+
+if (${gazebo_VERSION_MAJOR} LESS 6)
+  # These two
+  include(FindBoost)
+  find_package(Boost ${MIN_BOOST_VERSION} REQUIRED system filesystem regex)
+  target_link_libraries(movy ${GAZEBO_LIBRARIES} ${Boost_LIBRARIES})
+else()
+  target_link_libraries(movy ${GAZEBO_LIBRARIES})
+endif()
+
+add_executable(rot rot.cc)
+
+if (${gazebo_VERSION_MAJOR} LESS 6)
+  # These two
+  include(FindBoost)
+  find_package(Boost ${MIN_BOOST_VERSION} REQUIRED system filesystem regex)
+  target_link_libraries(rot ${GAZEBO_LIBRARIES} ${Boost_LIBRARIES})
+else()
+  target_link_libraries(rot ${GAZEBO_LIBRARIES})
+endif()
+
 add_executable(lift lift.cc)
 
 if (${gazebo_VERSION_MAJOR} LESS 6)
