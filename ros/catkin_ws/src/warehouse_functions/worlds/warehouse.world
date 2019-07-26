@@ -1,0 +1,20 @@
+<?xml version="1.0" ?>
+<sdf version="1.5">
+	<world name="warehouse">
+		<include>
+			<uri>model://sun</uri>
+		</include>
+		<include>
+			<uri>model://ground_plane</uri>
+		</include>	
+		<!--<include>
+			<uri>model://kiva</uri>
+			<pose>0 0 0 0 0 0</pose>
+			<name>kiva_1</name>
+			<plugin name="kiva_rotate_center" filename="libkiva_rotate_center.so">
+                <direction>0</direction>
+            </plugin>
+		</include>-->
+		<plugin name="warehouse_world" filename="libwarehouse_world_plugin.so" />	
+	</world>
+</sdf>
