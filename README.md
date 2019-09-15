@@ -7,4 +7,5 @@ We will be using the [Gazebo](http://gazebosim.org/) simulator for setting up th
 *  [3D models and environments](http://data.nvision2.eecs.yorku.ca/3DGEMS/) for Gazebo
 *  [3D Warehouse](https://3dwarehouse.sketchup.com/)
 
-
+# Final Report
+Final Report can be found at report/robot_se.pdf along with the necessary images at report/images
