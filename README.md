@@ -8,4 +8,4 @@ We will be using the [Gazebo](http://gazebosim.org/) simulator for setting up th
 *  [3D Warehouse](https://3dwarehouse.sketchup.com/)
 
 # Final Report
-Final Report can be found at report/robot_se.pdf along with the necessary images at report/images
+Final Report can be found at [report/robot_se.pdf](https://gitlab.lrz.de/software-engineering-in-robotics-ss19/models/blob/master/report/robot_se.pdf) along with the necessary images at [report/images](https://gitlab.lrz.de/software-engineering-in-robotics-ss19/models/tree/master/report/images)
