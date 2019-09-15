@@ -71,14 +71,6 @@ void createWarehouseCallback(warehouse_functions::create_warehouse_msg_request c
 	std::string warehouse_name = create_request.warehouse_name;
 	
 	int pos_x = 0, pos_y = 0;
-	while(no_of_robots) {
-		ROS_INFO("Spawning kiva_%d", no_of_robots);
-		std::string model_name = "kiva_" + std::to_string(no_of_robots);
-		spawn_model(n, model_name, ROBOT_MODEL_SDF, pos_x, pos_y);	
-		no_of_robots--;
-		pos_y++;
-	}
-	pos_x = 0, pos_y = 0;
 	bool alt = true;
 	while(no_of_storage_units) {
 		ROS_INFO("Spawning storage_unit_%d", no_of_storage_units);
@@ -104,6 +96,14 @@ void createWarehouseCallback(warehouse_functions::create_warehouse_msg_request c
 		else
 			pos_y++;
 		alt=!alt;
+	}
+	pos_x = 0, pos_y = 0;
+	while(no_of_robots) {
+		ROS_INFO("Spawning kiva_%d", no_of_robots);
+		std::string model_name = "kiva_" + std::to_string(no_of_robots);
+		spawn_model(n, model_name, ROBOT_MODEL_SDF, pos_x, pos_y);	
+		no_of_robots--;
+		pos_y++;
 	}
 	ROS_INFO("%s", warehouse_name.c_str());
 }
