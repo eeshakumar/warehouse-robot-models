@@ -1,0 +1,51 @@
+<?xml version="1.0" ?>
+<sdf version="1.6">
+<!-- storage unit model --> 
+		<model name="storage_unit">
+			<include>
+				<uri>model://shelf</uri>
+				<pose>0 0 0 0 0 0</pose>
+				<name>shelf_1</name>
+			</include>
+			<include>
+				<uri>model://shelf</uri>
+				<pose>0 0 0.2 0 0 0</pose>
+				<name>shelf_2</name>
+			</include>
+			<include>
+				<uri>model://shelf</uri>
+				<pose>0 0 0.4 0 0 0</pose>
+				<name>shelf_3</name>
+			</include>
+			<include>
+				<uri>model://shelf</uri>
+				<pose>0 0 0.6 0 0 0</pose>
+				<name>shelf_4</name>
+			</include>
+			<include>
+				<uri>model://shelf</uri>
+				<pose>0 0 0.8 0 0 0</pose>
+				<name>shelf_5</name>
+			</include>
+			<joint type="fixed" name="shelf_1_joint">
+        			<pose>0 0 0.2 0 0 0</pose>
+        			<child>shelf_2::body</child>
+        			<parent>shelf_1::body</parent>
+                	</joint>
+			<joint type="fixed" name="shelf_2_joint">
+        			<pose>0 0 0.4 0 0 0</pose>
+        			<child>shelf_3::body</child>
+        			<parent>shelf_2::body</parent>
+                	</joint>
+			<joint type="fixed" name="shelf_3_joint">
+        			<pose>0 0 0.6 0 0 0</pose>
+        			<child>shelf_4::body</child>
+        			<parent>shelf_3::body</parent>
+                	</joint>
+			<joint type="fixed" name="shelf_4_joint">
+        			<pose>0 0 0.8 0 0 0</pose>
+        			<child>shelf_5::body</child>
+        			<parent>shelf_4::body</parent>
+                	</joint>
+		</model>
+</sdf>

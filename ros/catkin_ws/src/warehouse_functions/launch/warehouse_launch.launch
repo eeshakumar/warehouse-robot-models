@@ -1,0 +1,18 @@
+<launch>
+  <include file="$(find gazebo_ros)/launch/empty_world.launch">
+    <arg name="world_name" value="$(find warehouse_functions)/worlds/warehouse.world"/>
+    <arg name="paused" value="true"/>
+    <arg name="use_sim_time" value="true"/>
+    <arg name="gui" value="true"/>
+    <arg name="recording" value="false"/>
+    <arg name="debug" value="false"/>
+  </include>
+    <!--<node pkg="warehouse_functions" type="create_warehouse_topics" name="create_warehouse_topics" output="screen">
+    </node>-->
+    <node pkg="warehouse_functions" type="create_warehouse_service_node" name="create_warehouse_service_node" output="screen">
+    </node>
+    <!--<node pkg="warehouse_functions" type="move_robots_publisher_node" name="move_robots_publisher_node" 	output="screen">
+    </node>	-->
+    <!--<node pkg="warehouse_functions" type="spawn_ex_node" name="spawn_ex_node" 	output="screen">
+    </node> -->
+</launch>

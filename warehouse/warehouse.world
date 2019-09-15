@@ -1,8 +1,44 @@
 <?xml version="1.0" ?>
 <sdf version="1.5">
 	<world name="warehouse">
-		<plugin name="warehouse_init" filename="./warehouse_plugins/libwarehouse_init_plugin.so">
-			<size>0</size>
-		</plugin>
+		<include>
+			<uri>model://sun</uri>
+		</include>
+		<include>
+			<uri>model://ground_plane</uri>
+		</include>
+		<!--<include>
+			<uri>model://./models/shelf</uri>
+			<name>shelf_kiva_1</name>
+		        <pose>2 2 0 0 0 0</pose>
+		</include>
+		<include>
+			<uri>model://./models/shelf</uri>
+			<name>shelf_kiva_2</name>
+			<pose>0 0 0 0 0 0</pose>
+		</include>-->
+		<!--<include>
+			<uri>model://./models/shelf</uri>
+			<name>shelf_kiva_3</name>
+			<pose>-2 -2 0 0 0 0</pose>
+		</include>-->
+		<!--<include>
+			<uri>model://./models/kiva</uri>
+			<name>kiva_1</name>
+		        <pose>2 2 0 0 0 0</pose>
+		</include>
+		<include>
+			<uri>model://./models/kiva</uri>
+			<name>kiva_2</name>
+			<pose>0 0 0 0 0 0</pose>
+		</include>-->
+		<!--<include>
+			<uri>model://kiva</uri>
+			<!--<name>kiva_3</name>-->
+			<!--<pose>-2 -2 0 0 0 0</pose>-->
+		</include> -->
+		<!--<plugin name="warehouse_plugin" filename="./warehouse_plugins/build/libwarehouse_plugin.so">
+			<shelves>10</shelves>
+		</plugin>-->
 	</world>
 </sdf>
