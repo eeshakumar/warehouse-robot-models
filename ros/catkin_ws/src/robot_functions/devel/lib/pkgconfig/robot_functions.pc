@@ -1,0 +1,8 @@
+prefix=/home/eeshakumar/SoSe19/robot-se/models/ros/catkin_ws/src/robot_functions/devel
+
+Name: robot_functions
+Description: Description of robot_functions
+Version: 0.0.0
+Cflags: 
+Libs: -L${prefix}/lib 
+Requires: gazebo_ros

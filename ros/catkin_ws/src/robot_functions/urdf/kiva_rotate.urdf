@@ -1,0 +1,8 @@
+<?xml version="1.0"?>
+<robot name="kiva_2">
+	<gazebo>
+    		<plugin name="kiva_rotate" filename="libros_functions.so">
+      			<direction>1</direction>
+    		</plugin>
+  	</gazebo>
+</robot>

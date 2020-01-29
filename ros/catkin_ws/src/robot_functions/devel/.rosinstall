@@ -1,0 +1,2 @@
+- setup-file:
+    local-name: /home/eeshakumar/SoSe19/robot-se/models/ros/catkin_ws/src/robot_functions/devel/setup.sh
